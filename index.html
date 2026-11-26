@@ -741,7 +741,8 @@
     const mapFrame = document.getElementById("mapFrame");
     const mapWrapper = document.getElementById("mapWrapper");
     document.getElementById("formLink").href = CONFIG.googleFormUrl;
-    document.getElementById("bottomFormLink").href = CONFIG.googleFormUrl;
+    const bottomLink = document.getElementById("bottomFormLink");
+    if (bottomLink) bottomLink.href = CONFIG.googleFormUrl;    
     mapFrame.src = formatDarkUrl(CONFIG.citiesMapUrl);
 
     function switchMap(type, btn) {
