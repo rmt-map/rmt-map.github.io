@@ -500,6 +500,17 @@
       margin: 0 auto;
     }
 
+    #topMusicals {
+      margin-top: 32px !important;
+      margin-bottom: 6px !important;
+    }
+    
+    #topMusicals + p,
+    #topMusicals + .sub-section-lead {
+      margin-top: 0 !important;
+      margin-bottom: 14px !important;
+    }
+    
     footer {
       margin-top: 56px;
       text-align: center;
@@ -794,42 +805,46 @@
     loadResponseCounter();
     
     async function loadKpiSummary() {
-      const container = document.getElementById("audienceKpis");
-      if (!container) return;
-    
-      try {
-        const sheetName = encodeURIComponent("KPI_Summary");
-        const url = `https://docs.google.com/spreadsheets/d/${CONFIG.spreadsheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
-        const response = await fetch(url);
-        const text = await response.text();
-        const json = JSON.parse(text.substring(47).slice(0, -2));
-    
-        const cardsHtml = json.table.rows
-          .map((row) => {
-            if (!row.c) return "";
-            const label = row.c[1]?.v;
-            const value = row.c[2]?.v;
-            const sub = row.c[3]?.v;
-    
-            if (!label || value === null || value === undefined) return "";
-    
-            return `
-              <div class="kpi-card">
-                <div class="kpi-label">${label}</div>
-                <div class="kpi-value">${value}</div>
-                ${sub ? `<div class="kpi-sub">${sub}</div>` : ""}
-              </div>
-            `;
-          })
-          .join("");
-    
-        if (cardsHtml) {
-          container.innerHTML = cardsHtml;
-        }
-      } catch (err) {
-        console.warn("Ошибка загрузки KPI_Summary:", err);
+    const container = document.getElementById("audienceKpis");
+    if (!container) return;
+  
+    try {
+      const sheetName = encodeURIComponent("KPI_Summary");
+      const url = `https://docs.google.com/spreadsheets/d/${CONFIG.spreadsheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}&headers=1`;
+      const response = await fetch(url);
+      const text = await response.text();
+      const json = JSON.parse(text.substring(47).slice(0, -2));
+  
+      const cardsHtml = json.table.rows
+        .map((row) => {
+          if (!row.c) return "";
+          const key = String(row.c[0]?.v || "").trim().toLowerCase();
+          const label = row.c[1]?.v;
+          const value = row.c[2]?.v;
+          const sub = row.c[3]?.v;
+  
+          // Пропускаем строку заголовков, даже если gviz отдаст её как данные
+          if (!label || value === null || value === undefined || key === "ключ" || label === "Заголовок плашки") {
+            return "";
+          }
+  
+          return `
+            <div class="kpi-card">
+              <div class="kpi-label">${label}</div>
+              <div class="kpi-value">${value}</div>
+              ${sub ? `<div class="kpi-sub">${sub}</div>` : ""}
+            </div>
+          `;
+        })
+        .join("");
+  
+      if (cardsHtml) {
+        container.innerHTML = cardsHtml;
       }
+    } catch (err) {
+      console.warn("Ошибка загрузки KPI_Summary:", err);
     }
+  }
     
     loadKpiSummary();
     
