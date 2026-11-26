@@ -360,16 +360,16 @@
       <div class="charts-stack">
         <div class="chart-card">
           <div class="donut-inner">
-            <iframe title="Как часто вы ходите на мюзиклы в театр?" aria-label="Donut Chart" id="datawrapper-chart-Zx4t2" src="https://datawrapper.dwcdn.net/Zx4t2/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="420" data-external="1"></iframe>
+            <div style="min-height:410px" id="datawrapper-vis-Zx4t2"><script type="text/javascript" defer src="https://datawrapper.dwcdn.net/Zx4t2/embed.js" charset="utf-8" data-target="#datawrapper-vis-Zx4t2"></script><noscript><img src="https://datawrapper.dwcdn.net/Zx4t2/full.png" alt="Как часто вы ходите на мюзиклы в театр? (Donut Chart)" /></noscript></div>
           </div>
         </div>
 
         <div class="chart-card">
-          <iframe title="Ездите ли вы в другие города ради походов на мюзиклы?" aria-label="Bar Chart" id="datawrapper-chart-s7CMr" src="https://datawrapper.dwcdn.net/s7CMr/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="400" data-external="1"></iframe>
+          <div style="min-height:604px" id="datawrapper-vis-s7CMr"><script type="text/javascript" defer src="https://datawrapper.dwcdn.net/s7CMr/embed.js" charset="utf-8" data-target="#datawrapper-vis-s7CMr"></script><noscript><img src="https://datawrapper.dwcdn.net/s7CMr/full.png" alt="Ездите ли вы в другие города (или страны) ради походов на мюзиклы? (Bar Chart)" /></noscript></div>
         </div>
 
         <div class="chart-card">
-          <iframe title="Топ-10 любимых постановок" aria-label="Bar Chart" id="datawrapper-chart-ujpeL" src="https://datawrapper.dwcdn.net/ujpeL/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="560" data-external="1"></iframe>
+          <div style="min-height:465px" id="datawrapper-vis-ujpeL"><script type="text/javascript" defer src="https://datawrapper.dwcdn.net/ujpeL/embed.js" charset="utf-8" data-target="#datawrapper-vis-ujpeL"></script><noscript><img src="https://datawrapper.dwcdn.net/ujpeL/full.png" alt="Топ-10 любимых постановок (Bar Chart)" /></noscript></div>
         </div>
       </div>
     </section>
@@ -436,8 +436,8 @@
         
         let total = 0;
         json.table.rows.forEach(row => {
-          if (row.c && row.c[1] && typeof row.c[1].v === "number") {
-            total += row.c[1].v;
+          if (row.c && row.c.at(1) && typeof row.c.at(1).v === "number") {
+            total += row.c.at(1).v;
           }
         });
 
@@ -452,17 +452,6 @@
 
     loadResponseCounter();
 
-    // Автовысота графиков Datawrapper
-    window.addEventListener("message", function(a) {
-      if (void 0 !== a.data["datawrapper-height"]) {
-        var e = document.querySelectorAll("iframe");
-        for (var t in a.data["datawrapper-height"])
-          for (var r = 0; r < e.length; r++)
-            if (e[r].contentWindow === a.source) {
-              e[r].style.height = a.data["datawrapper-height"][t] + "px";
-            }
-      }
-    });
   </script>
 
 </body>
