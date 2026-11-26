@@ -394,6 +394,39 @@
       margin-bottom: 24px;
     }
 
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 16px 18px;
+    }
+    
+    .kpi-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    
+    .kpi-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent-gold);
+      line-height: 1.25;
+    }
+    
+    .kpi-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    
     .charts-stack {
       display: flex;
       flex-direction: column;
@@ -592,7 +625,9 @@
     <section class="stats-section">
       <h2>Портрет аудитории</h2>
       <p class="subtitle">По результатам опроса (данные обновляются автоматически).</p>
-    
+
+    <div class="kpi-strip" id="audienceKpis"></div>
+      
       <h3 id="baseAudience" class="sub-section-title">Возраст и стаж в фандоме</h3>
       <p class="sub-section-lead">
         Из кого состоит фандом? Как долго фанаты следят за российскими мюзиклами?
@@ -629,11 +664,9 @@
             <script type="text/javascript" defer src="https://datawrapper.dwcdn.net/s7CMr/embed.js" charset="utf-8" data-target="#datawrapper-vis-s7CMr" data-dark="true"></script>
           </div>
         </div>
-    
-      <h3 id="topMusicals" class="sub-section-title" style="margin-top: 32px;">Топ-10 любимых спектаклей</h3>
-      <p class="sub-section-lead">
-        Какие российские мюзиклы больше всего любят фанаты по всему миру? Топ-10 постановок, которые участники опроса называли среди своих фаворитов чаще всего.
-      </p>
+
+      <h3 id="topMusicals" class="sub-section-title">Топ-10 любимых спектаклей</h3>
+      <p class="sub-section-lead">Какие российские мюзиклы больше всего любят фанаты по всему миру? Топ-10 постановок, которые участники опроса называли среди своих фаворитов чаще всего.</p>
       <div class="charts-stack">
         <div class="chart-card">
           <div style="min-height:560px" id="datawrapper-vis-ujpeL">
@@ -759,7 +792,47 @@
     }
 
     loadResponseCounter();
-
+    
+    async function loadKpiSummary() {
+      const container = document.getElementById("audienceKpis");
+      if (!container) return;
+    
+      try {
+        const sheetName = encodeURIComponent("KPI_Summary");
+        const url = `https://docs.google.com/spreadsheets/d/${CONFIG.spreadsheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+        const response = await fetch(url);
+        const text = await response.text();
+        const json = JSON.parse(text.substring(47).slice(0, -2));
+    
+        const cardsHtml = json.table.rows
+          .map((row) => {
+            if (!row.c) return "";
+            const label = row.c[1]?.v;
+            const value = row.c[2]?.v;
+            const sub = row.c[3]?.v;
+    
+            if (!label || value === null || value === undefined) return "";
+    
+            return `
+              <div class="kpi-card">
+                <div class="kpi-label">${label}</div>
+                <div class="kpi-value">${value}</div>
+                ${sub ? `<div class="kpi-sub">${sub}</div>` : ""}
+              </div>
+            `;
+          })
+          .join("");
+    
+        if (cardsHtml) {
+          container.innerHTML = cardsHtml;
+        }
+      } catch (err) {
+        console.warn("Ошибка загрузки KPI_Summary:", err);
+      }
+    }
+    
+    loadKpiSummary();
+    
     const backToTopBtn = document.getElementById("backToTopBtn");
     
     if (backToTopBtn) {
