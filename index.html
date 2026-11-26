@@ -349,27 +349,27 @@
       <h2>Портрет аудитории</h2>
       <p class="subtitle">Результаты опроса фанатов российского музыкального театра (данные обновляются автоматически).</p>
 
-      <div class="charts-stack">
-        <div class="chart-card">
-          <div class="donut-inner">
-            <div style="min-height:420px" id="datawrapper-vis-Zx4t2">
-              <script type="text/javascript" defer src="https://dwcdn.net" charset="utf-8" data-target="#datawrapper-vis-Zx4t2" data-dark="true"></script>
-            </div>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <div style="min-height:400px" id="datawrapper-vis-s7CMr">
-            <script type="text/javascript" defer src="https://dwcdn.net" charset="utf-8" data-target="#datawrapper-vis-s7CMr" data-dark="true"></script>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <div style="min-height:560px" id="datawrapper-vis-ujpeL">
-            <script type="text/javascript" defer src="https://dwcdn.net" charset="utf-8" data-target="#datawrapper-vis-ujpeL" data-dark="true"></script>
+    <div class="charts-stack">
+      <div class="chart-card">
+        <div class="donut-inner">
+          <div style="min-height:420px" id="datawrapper-vis-Zx4t2">
+            <script type="text/javascript" defer src="https://datawrapper.dwcdn.net/Zx4t2/embed.js" charset="utf-8" data-target="#datawrapper-vis-Zx4t2" data-dark="true"></script>
           </div>
         </div>
       </div>
+    
+      <div class="chart-card">
+        <div style="min-height:400px" id="datawrapper-vis-s7CMr">
+          <script type="text/javascript" defer src="https://datawrapper.dwcdn.net/s7CMr/embed.js" charset="utf-8" data-target="#datawrapper-vis-s7CMr" data-dark="true"></script>
+        </div>
+      </div>
+    
+      <div class="chart-card">
+        <div style="min-height:560px" id="datawrapper-vis-ujpeL">
+          <script type="text/javascript" defer src="https://datawrapper.dwcdn.net/ujpeL/embed.js" charset="utf-8" data-target="#datawrapper-vis-ujpeL" data-dark="true"></script>
+        </div>
+      </div>
+    </div>
     </section>
 
     <footer>
@@ -424,7 +424,7 @@
     async function loadResponseCounter() {
       try {
         const sheetName = encodeURIComponent("Для_Карты_Стран");
-        const url = `https://google.com{CONFIG.spreadsheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+        const url = `https://docs.google.com/spreadsheets/d/${CONFIG.spreadsheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
         const response = await fetch(url);
         const text = await response.text();
         const json = JSON.parse(text.substring(47).slice(0, -2));
