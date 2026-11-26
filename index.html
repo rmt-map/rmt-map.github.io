@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>География фанатов российского музыкального театра</title>
+  <link rel="preconnect" href="https://googleapis.com">
+  <link rel="preconnect" href="https://gstatic.com" crossorigin>
+  <link href="https://googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #18181b;
+      --bg-card: #252529;
+      --border-subtle: #383842;
+      --text-main: #f4f4f6;
+      --text-muted: #a1a1aa;
+      --accent-gold: #ffdd77;
+      --accent-gold-dark: #3d2400;
+      --accent-purple: #7b2cbf;
+      --accent-purple-light: #c77dff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* Шапка сайта */
+    header {
+      padding: 40px 0 28px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 28px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .header-text h1 {
+      font-size: clamp(24px, 4vw, 34px);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+      color: #fef5db;
+    }
+
+    .header-text p {
+      color: var(--text-muted);
+      font-size: 15px;
+      max-width: 650px;
+    }
+
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent-gold);
+      color: var(--accent-gold-dark);
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: 1px solid #e6b800;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 221, 119, 0.25);
+    }
+
+    /* Панель управления картой */
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .tabs {
+      display: inline-flex;
+      background: var(--bg-card);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .tab-btn {
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      padding: 9px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .tab-btn.active {
+      background: var(--accent-purple);
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .fullscreen-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      padding: 9px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+      font-family: inherit;
+    }
+
+    .fullscreen-btn:hover {
+      border-color: var(--accent-gold);
+      color: var(--accent-gold);
+    }
+
+    /* Подсказка для портретного режима на смартфоне */
+    .mobile-rotate-hint {
+      display: none;
+      background: rgba(255, 221, 119, 0.1);
+      border: 1px solid rgba(255, 221, 119, 0.35);
+      color: var(--accent-gold);
+      font-size: 13px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 768px) and (orientation: portrait) {
+      .mobile-rotate-hint {
+        display: block;
+      }
+    }
+
+    /* Контейнер карты */
+    .map-wrapper {
+      background: #252525;
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .map-scroll-area {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .map-frame {
+      width: 100%;
+      height: 620px;
+      border: none;
+      display: block;
+    }
+
+    /* На вертикальном телефоне делаем карту шире экрана, чтобы точки были крупными */
+    @media (max-width: 680px) and (orientation: portrait) {
+      .map-frame {
+        min-width: 680px;
+        height: 460px;
+      }
+    }
+
+    /* Полноэкранный режим (работает на всех устройствах, включая iPhone) */
+    .map-wrapper.is-fullscreen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      border-radius: 0;
+      border: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .map-wrapper.is-fullscreen .map-scroll-area {
+      flex: 1;
+      height: 100%;
+    }
+
+    .map-wrapper.is-fullscreen .map-frame {
+      height: 100%;
+      min-width: 100%;
+    }
+
+    .close-fullscreen-btn {
+      display: none;
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 10000;
+      background: rgba(24, 24, 27, 0.9);
+      color: var(--accent-gold);
+      border: 1px solid var(--accent-gold);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+    }
+
+    .map-wrapper.is-fullscreen .close-fullscreen-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Секция для будущей инфографики */
+    .stats-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .stats-section h2 {
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+
+    .stats-section p.subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .chart-placeholder {
+      background: var(--bg-card);
+      border: 1px dashed var(--border-subtle);
+      border-radius: 12px;
+      padding: 32px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    footer {
+      margin-top: 56px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <header>
+      <div class="header-text">
+        <h1>Карта фанатов российского музыкального театра</h1>
+        <p>Привет! Перед вами результат моего исследования о том, где живут и что любят фанаты российского музыкального
+          театра по всему миру. Данные на картах и графиках обновляются автоматически по
+          мере заполнения анкеты.</p>
+      </div>
+      <a id="formLink" href="#" target="_blank" rel="noopener" class="cta-button">
+        + Добавить себя на карту
+      </a>
+    </header>
+
+    <div class="controls-bar">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchMap('cities', this)">По городам</button>
+        <button class="tab-btn" onclick="switchMap('countries', this)">По странам</button>
+      </div>
+
+      <button class="fullscreen-btn" onclick="toggleFullscreen()">
+        ⛶ На весь экран
+      </button>
+    </div>
+
+    <div class="mobile-rotate-hint">
+      ↻ Поверните телефон горизонтально или нажмите «На весь экран», чтобы рассмотреть карту крупнее
+    </div>
+
+    <div class="map-wrapper" id="mapWrapper">
+      <button class="close-fullscreen-btn" onclick="toggleFullscreen()">✕ Свернуть</button>
+      <div class="map-scroll-area">
+        <iframe id="mapFrame" class="map-frame" src="" title="Интерактивная карта фанатов" allowfullscreen></iframe>
+      </div>
+    </div>
+
+    <!-- Блок для будущих графиков из Datawrapper -->
+    <section class="stats-section">
+      <h2>Портрет аудитории</h2>
+      <p class="subtitle">Скоро здесь появятся графики о театральном туризме, любимых постановках и опыте зрителей.</p>
+      <div class="charts-grid">
+        <div class="chart-placeholder">Место для графика №1 (например, театральные поездки)</div>
+        <div class="chart-placeholder">Место для графика №2 (стаж в фандоме и частота походов)</div>
+      </div>
+    </section>
+
+    <footer>
+      Некоммерческий проект • Визуализация: Datawrapper
+    </footer>
+  </div>
+
+  <script>
+    // ==========================================
+    // НАСТРОЙКИ: ВСТАВЬ СЮДА СВОИ ССЫЛКИ
+    // ==========================================
+    const CONFIG = {
+      citiesMapUrl: "https://datawrapper.dwcdn.net/64lRk/",
+      countriesMapUrl: "https://datawrapper.dwcdn.net/LpIe2/",
+      googleFormUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfx_Is-axYKQVNNHqPBxG_7r1Ki0Rlufa9jxaaI3dutKPVchw/viewform?usp=header"
+    };
+
+    // Автоматически добавляем ?dark=true к ссылкам на карты
+    function formatDarkUrl(url) {
+      if (!url || url.includes("ССЫЛКА")) return "";
+      const separator = url.includes("?") ? "&" : "?";
+      return url + separator + "dark=true";
+    }
+
+    const mapFrame = document.getElementById("mapFrame");
+    const mapWrapper = document.getElementById("mapWrapper");
+    document.getElementById("formLink").href = CONFIG.googleFormUrl;
+
+    // Загружаем карту городов по умолчанию
+    mapFrame.src = formatDarkUrl(CONFIG.citiesMapUrl);
+
+    // Переключение вкладок
+    function switchMap(type, btn) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const targetUrl = type === "cities" ? CONFIG.citiesMapUrl : CONFIG.countriesMapUrl;
+      mapFrame.src = formatDarkUrl(targetUrl);
+    }
+
+    // Полноэкранный режим (нативный + fallback для iOS)
+    function toggleFullscreen() {
+      const isFull = mapWrapper.classList.toggle("is-fullscreen");
+      document.body.style.overflow = isFull ? "hidden" : "";
+    }
+    // Закрытие полноэкранного режима по клавише Esc
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && mapWrapper.classList.contains("is-fullscreen")) {
+        toggleFullscreen();
+      }
+    });
+
+  </script>
+
+</body>
+
+</html>
