@@ -240,7 +240,7 @@
       gap: 6px;
     }
 
-    /* Секция для будущей инфографики */
+    /* Секция инфографики */
     .stats-section {
       margin-top: 48px;
       padding-top: 32px;
@@ -260,7 +260,7 @@
 
     .charts-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: 1fr;
       gap: 20px;
     }
 
@@ -314,12 +314,7 @@
     <header>
       <div class="header-text">
         <h1>Карта фанатов РМТ</h1>
-        <p>Привет! Перед вами результат моего исследования о том, где живут и что любят фанаты российского музыкального
-          театра по всему миру. Данные на картах и графиках обновляются автоматически по
-          мере заполнения анкеты.</p>
-              <div class="header-text">
-        <h1>Карта фанатов российского музыкального театра</h1>
-        <p>Независимое исследование географии и театральных предпочтений зрителей. Данные обновляются автоматически по мере заполнения анкеты.</p>
+        <p>Привет! Перед вами результат моего исследования о том, где живут и что любят фанаты российского музыкального театра по всему миру. Данные на картах и графиках обновляются автоматически по мере заполнения анкеты.</p>
         <div class="counter-badge" id="counterBadge" style="display: none;">
           <span class="counter-dot"></span>
           <span>Уже на карте: <strong id="totalResponses">0</strong></span>
@@ -404,13 +399,15 @@
       try {
         const response = await fetch(COUNTRIES_CSV_URL);
         const csvText = await response.text();
-        const rows = csvText.trim().split("\n").slice(1); // пропускаем заголовок
+        const rows = csvText.trim().split(/\r?\n/).slice(1); // пропускаем заголовок
         
         let total = 0;
         rows.forEach(row => {
-          const cols = row.split(",");
-          const count = parseInt(cols[cols.length - 1].replace(/"/g, "").trim(), 10);
-          if (!isNaN(count)) total += count;
+          // Ищем последнее число в строке (количество ответов по стране)
+          const match = row.match(/(\d+)\s*"?\s*$/);
+          if (match) {
+            total += parseInt(match[1], 10);
+          }
         });
 
         if (total > 0) {
