@@ -264,14 +264,12 @@
       gap: 20px;
     }
 
-    .chart-placeholder {
-      background: var(--bg-card);
-      border: 1px dashed var(--border-subtle);
-      border-radius: 12px;
-      padding: 32px 20px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 14px;
+    .chart-card {
+      background: #252525;
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 18px 18px 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     }
 
     footer {
@@ -280,6 +278,33 @@
       color: var(--text-muted);
       font-size: 13px;
     }
+        .counter-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(123, 44, 191, 0.2);
+      border: 1px solid rgba(199, 125, 255, 0.4);
+      color: #f4f4f6;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 20px;
+      margin-top: 12px;
+    }
+
+    .counter-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-gold);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-gold);
+    }
+
+    .counter-badge strong {
+      color: var(--accent-gold);
+      font-weight: 700;
+    }
+
   </style>
 </head>
 
@@ -292,6 +317,14 @@
         <p>Привет! Перед вами результат моего исследования о том, где живут и что любят фанаты российского музыкального
           театра по всему миру. Данные на картах и графиках обновляются автоматически по
           мере заполнения анкеты.</p>
+              <div class="header-text">
+        <h1>Карта фанатов российского музыкального театра</h1>
+        <p>Независимое исследование географии и театральных предпочтений зрителей. Данные обновляются автоматически по мере заполнения анкеты.</p>
+        <div class="counter-badge" id="counterBadge" style="display: none;">
+          <span class="counter-dot"></span>
+          <span>Уже на карте: <strong id="totalResponses">0</strong></span>
+        </div>
+      </div>
       </div>
       <a id="formLink" href="#" target="_blank" rel="noopener" class="cta-button">
         + Добавить себя на карту
@@ -320,13 +353,22 @@
       </div>
     </div>
 
-    <!-- Блок для будущих графиков из Datawrapper -->
+    <!-- Блок с инфографикой из Datawrapper -->
     <section class="stats-section">
       <h2>Портрет аудитории</h2>
-      <p class="subtitle">Скоро здесь появятся графики о театральном туризме, любимых постановках и опыте зрителей.</p>
+      <p class="subtitle">Результаты опроса фанатов российского музыкального театра (данные обновляются автоматически).</p>
+      
       <div class="charts-grid">
-        <div class="chart-placeholder">Место для графика №1 (например, театральные поездки)</div>
-        <div class="chart-placeholder">Место для графика №2 (стаж в фандоме и частота походов)</div>
+        <div class="chart-card">
+          <iframe title="Как часто вы ходите на мюзиклы в театр?" aria-label="Bar Chart" id="datawrapper-chart-Zx4t2" src="https://datawrapper.dwcdn.net/Zx4t2/?dark=true" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="400" data-external="1"></iframe>
+        </div>
+        <div class="chart-card">
+          <iframe title="Ездите ли вы в другие города ради походов на мюзиклы?" aria-label="Bar Chart" id="datawrapper-chart-s7CMr" src="https://datawrapper.dwcdn.net/s7CMr/?dark=true" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="400" data-external="1"></iframe>
+        </div>
+      </div>
+
+      <div class="chart-card" style="margin-top: 20px;">
+        <iframe title="Топ-10 любимых постановок" aria-label="Bar Chart" id="datawrapper-chart-ujpeL" src="https://datawrapper.dwcdn.net/ujpeL/?dark=true" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="560" data-external="1"></iframe>
       </div>
     </section>
 
@@ -344,6 +386,44 @@
       countriesMapUrl: "https://datawrapper.dwcdn.net/LpIe2/",
       googleFormUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfx_Is-axYKQVNNHqPBxG_7r1Ki0Rlufa9jxaaI3dutKPVchw/viewform?usp=header"
     };
+    
+    const COUNTRIES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTjRWc7NMtA1-MdTeU1QArUq_jhNdsTn9WyrKR0OPIuBmTkDXzDQj_qRWlJSIODQt_z0ujF6wLmRpN0/pub?gid=1258532984&single=true&output=csv";
+
+    // Склонение слова "участник"
+    function pluralizeParticipants(n) {
+      const mod10 = n % 10;
+      const mod100 = n % 100;
+      if (mod10 === 1 && mod100 !== 11) return `${n} участник`;
+      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return `${n} участника`;
+      return `${n} участников`;
+    }
+
+    // Загружаем CSV и складываем все ответы
+    async function loadResponseCounter() {
+      if (!COUNTRIES_CSV_URL || COUNTRIES_CSV_URL.includes("https://docs.google.com/spreadsheets/d/e/2PACX-1vTjRWc7NMtA1-MdTeU1QArUq_jhNdsTn9WyrKR0OPIuBmTkDXzDQj_qRWlJSIODQt_z0ujF6wLmRpN0/pub?gid=1258532984&single=true&output=csv")) return;
+      try {
+        const response = await fetch(COUNTRIES_CSV_URL);
+        const csvText = await response.text();
+        const rows = csvText.trim().split("\n").slice(1); // пропускаем заголовок
+        
+        let total = 0;
+        rows.forEach(row => {
+          const cols = row.split(",");
+          const count = parseInt(cols[cols.length - 1].replace(/"/g, "").trim(), 10);
+          if (!isNaN(count)) total += count;
+        });
+
+        if (total > 0) {
+          document.getElementById("totalResponses").textContent = pluralizeParticipants(total);
+          document.getElementById("counterBadge").style.display = "inline-flex";
+        }
+      } catch (err) {
+        console.warn("Не удалось загрузить счётчик ответов:", err);
+      }
+    }
+
+    loadResponseCounter();
+
 
     // Автоматически добавляем ?dark=true к ссылкам на карты
     function formatDarkUrl(url) {
@@ -380,6 +460,20 @@
       }
     });
 
+  </script>
+  
+  <script type="text/javascript">
+    window.addEventListener("message", function(a) {
+      if (void 0 !== a.data["datawrapper-height"]) {
+        var e = document.querySelectorAll("iframe");
+        for (var t in a.data["datawrapper-height"])
+          for (var r = 0; r < e.length; r++)
+            if (e[r].contentWindow === a.source) {
+              var i = a.data["datawrapper-height"][t] + "px";
+              e[r].style.height = i;
+            }
+      }
+    });
   </script>
 
 </body>
