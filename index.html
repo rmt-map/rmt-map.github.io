@@ -1,24 +1,22 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>География фанатов российского музыкального театра</title>
+  <title>Карта фанатов РМТ</title>
   <link rel="preconnect" href="https://googleapis.com">
   <link rel="preconnect" href="https://gstatic.com" crossorigin>
   <link href="https://googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-main: #18181b;
-      --bg-card: #252529;
+      --bg-card: #252525;
       --border-subtle: #383842;
       --text-main: #f4f4f6;
       --text-muted: #a1a1aa;
       --accent-gold: #ffdd77;
       --accent-gold-dark: #3d2400;
       --accent-purple: #7b2cbf;
-      --accent-purple-light: #c77dff;
     }
 
     * {
@@ -53,18 +51,50 @@
       gap: 20px;
     }
 
+    .header-text {
+      flex: 1;
+      min-width: 280px;
+    }
+
     .header-text h1 {
-      font-size: clamp(24px, 4vw, 34px);
+      font-size: clamp(26px, 4vw, 36px);
       font-weight: 700;
       letter-spacing: -0.5px;
       margin-bottom: 8px;
-      color: #fef5db;
+      color: #ffffff;
     }
 
     .header-text p {
       color: var(--text-muted);
       font-size: 15px;
-      max-width: 650px;
+      max-width: 680px;
+    }
+
+    .counter-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(123, 44, 191, 0.22);
+      border: 1px solid rgba(199, 125, 255, 0.45);
+      color: #f4f4f6;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 20px;
+      margin-top: 14px;
+    }
+
+    .counter-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-gold);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-gold);
+    }
+
+    .counter-badge strong {
+      color: var(--accent-gold);
+      font-weight: 700;
     }
 
     .cta-button {
@@ -76,7 +106,7 @@
       font-weight: 700;
       font-size: 14px;
       text-decoration: none;
-      padding: 12px 20px;
+      padding: 12px 22px;
       border-radius: 10px;
       border: 1px solid #e6b800;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -146,7 +176,6 @@
       color: var(--accent-gold);
     }
 
-    /* Подсказка для портретного режима на смартфоне */
     .mobile-rotate-hint {
       display: none;
       background: rgba(255, 221, 119, 0.1);
@@ -167,7 +196,7 @@
 
     /* Контейнер карты */
     .map-wrapper {
-      background: #252525;
+      background: var(--bg-card);
       border: 1px solid var(--border-subtle);
       border-radius: 14px;
       overflow: hidden;
@@ -188,7 +217,6 @@
       display: block;
     }
 
-    /* На вертикальном телефоне делаем карту шире экрана, чтобы точки были крупными */
     @media (max-width: 680px) and (orientation: portrait) {
       .map-frame {
         min-width: 680px;
@@ -196,7 +224,6 @@
       }
     }
 
-    /* Полноэкранный режим (работает на всех устройствах, включая iPhone) */
     .map-wrapper.is-fullscreen {
       position: fixed;
       inset: 0;
@@ -240,7 +267,7 @@
       gap: 6px;
     }
 
-    /* Секция инфографики */
+    /* Секция с инфографикой */
     .stats-section {
       margin-top: 48px;
       padding-top: 32px;
@@ -248,8 +275,9 @@
     }
 
     .stats-section h2 {
-      font-size: 22px;
-      margin-bottom: 8px;
+      font-size: 24px;
+      margin-bottom: 6px;
+      color: #ffffff;
     }
 
     .stats-section p.subtitle {
@@ -258,18 +286,24 @@
       margin-bottom: 24px;
     }
 
-    .charts-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
+    .charts-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
     }
 
     .chart-card {
-      background: #252525;
+      background: var(--bg-card);
       border: 1px solid var(--border-subtle);
       border-radius: 14px;
-      padding: 18px 18px 10px;
+      padding: 20px 20px 12px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Ограничиваем ширину кольцевой диаграммы, чтобы она не гигантизировалась */
+    .donut-inner {
+      max-width: 640px;
+      margin: 0 auto;
     }
 
     footer {
@@ -278,36 +312,8 @@
       color: var(--text-muted);
       font-size: 13px;
     }
-        .counter-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(123, 44, 191, 0.2);
-      border: 1px solid rgba(199, 125, 255, 0.4);
-      color: #f4f4f6;
-      font-size: 13px;
-      font-weight: 500;
-      padding: 6px 12px;
-      border-radius: 20px;
-      margin-top: 12px;
-    }
-
-    .counter-dot {
-      width: 8px;
-      height: 8px;
-      background-color: var(--accent-gold);
-      border-radius: 50%;
-      box-shadow: 0 0 8px var(--accent-gold);
-    }
-
-    .counter-badge strong {
-      color: var(--accent-gold);
-      font-weight: 700;
-    }
-
   </style>
 </head>
-
 <body>
 
   <div class="container">
@@ -319,7 +325,6 @@
           <span class="counter-dot"></span>
           <span>Уже на карте: <strong id="totalResponses">0</strong></span>
         </div>
-      </div>
       </div>
       <a id="formLink" href="#" target="_blank" rel="noopener" class="cta-button">
         + Добавить себя на карту
@@ -348,22 +353,24 @@
       </div>
     </div>
 
-    <!-- Блок с инфографикой из Datawrapper -->
     <section class="stats-section">
       <h2>Портрет аудитории</h2>
       <p class="subtitle">Результаты опроса фанатов российского музыкального театра (данные обновляются автоматически).</p>
-      
-      <div class="charts-grid">
-        <div class="chart-card">
-          <iframe title="Как часто вы ходите на мюзиклы в театр?" aria-label="Bar Chart" id="datawrapper-chart-Zx4t2" src="https://datawrapper.dwcdn.net/Zx4t2/?dark=true" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="400" data-external="1"></iframe>
-        </div>
-        <div class="chart-card">
-          <iframe title="Ездите ли вы в другие города ради походов на мюзиклы?" aria-label="Bar Chart" id="datawrapper-chart-s7CMr" src="https://datawrapper.dwcdn.net/s7CMr/?dark=true" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="400" data-external="1"></iframe>
-        </div>
-      </div>
 
-      <div class="chart-card" style="margin-top: 20px;">
-        <iframe title="Топ-10 любимых постановок" aria-label="Bar Chart" id="datawrapper-chart-ujpeL" src="https://datawrapper.dwcdn.net/ujpeL/?dark=true" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="560" data-external="1"></iframe>
+      <div class="charts-stack">
+        <div class="chart-card">
+          <div class="donut-inner">
+            <iframe title="Как часто вы ходите на мюзиклы в театр?" aria-label="Donut Chart" id="datawrapper-chart-Zx4t2" src="https://dwcdn.net" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="420" data-external="1"></iframe>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <iframe title="Ездите ли вы в другие города ради походов на мюзиклы?" aria-label="Bar Chart" id="datawrapper-chart-s7CMr" src="https://dwcdn.net" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="400" data-external="1"></iframe>
+        </div>
+
+        <div class="chart-card">
+          <iframe title="Топ-10 любимых постановок" aria-label="Bar Chart" id="datawrapper-chart-ujpeL" src="https://dwcdn.net" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="560" data-external="1"></iframe>
+        </div>
       </div>
     </section>
 
@@ -373,18 +380,42 @@
   </div>
 
   <script>
-    // ==========================================
-    // НАСТРОЙКИ: ВСТАВЬ СЮДА СВОИ ССЫЛКИ
-    // ==========================================
     const CONFIG = {
-      citiesMapUrl: "https://datawrapper.dwcdn.net/64lRk/",
-      countriesMapUrl: "https://datawrapper.dwcdn.net/LpIe2/",
-      googleFormUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfx_Is-axYKQVNNHqPBxG_7r1Ki0Rlufa9jxaaI3dutKPVchw/viewform?usp=header"
+      citiesMapUrl: "https://dwcdn.net",
+      countriesMapUrl: "https://dwcdn.net",
+      googleFormUrl: "https://google.com",
+      // Вставь сюда ID твоей Google Таблицы (длинная строка между /d/ и /edit из адресной строки таблицы)
+      spreadsheetId: "1-If-KdtCE1JNZVM_qyNZVEcN2tK5GfHs291A-5Jq-_I"
     };
-    
-    const COUNTRIES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTjRWc7NMtA1-MdTeU1QArUq_jhNdsTn9WyrKR0OPIuBmTkDXzDQj_qRWlJSIODQt_z0ujF6wLmRpN0/pub?gid=1258532984&single=true&output=csv";
 
-    // Склонение слова "участник"
+    function formatDarkUrl(url) {
+      const separator = url.includes("?") ? "&" : "?";
+      return url + separator + "dark=true";
+    }
+
+    const mapFrame = document.getElementById("mapFrame");
+    const mapWrapper = document.getElementById("mapWrapper");
+    document.getElementById("formLink").href = CONFIG.googleFormUrl;
+    mapFrame.src = formatDarkUrl(CONFIG.citiesMapUrl);
+
+    function switchMap(type, btn) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const targetUrl = type === "cities" ? CONFIG.citiesMapUrl : CONFIG.countriesMapUrl;
+      mapFrame.src = formatDarkUrl(targetUrl);
+    }
+
+    function toggleFullscreen() {
+      const isFull = mapWrapper.classList.toggle("is-fullscreen");
+      document.body.style.overflow = isFull ? "hidden" : "";
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && mapWrapper.classList.contains("is-fullscreen")) {
+        toggleFullscreen();
+      }
+    });
+
     function pluralizeParticipants(n) {
       const mod10 = n % 10;
       const mod100 = n % 100;
@@ -393,20 +424,20 @@
       return `${n} участников`;
     }
 
-    // Загружаем CSV и складываем все ответы
+    // Надёжный подсчёт ответов через открытый интерфейс Google Sheets
     async function loadResponseCounter() {
-      if (!COUNTRIES_CSV_URL || COUNTRIES_CSV_URL.includes("https://docs.google.com/spreadsheets/d/e/2PACX-1vTjRWc7NMtA1-MdTeU1QArUq_jhNdsTn9WyrKR0OPIuBmTkDXzDQj_qRWlJSIODQt_z0ujF6wLmRpN0/pub?gid=1258532984&single=true&output=csv")) return;
+      if (!CONFIG.spreadsheetId || CONFIG.spreadsheetId.includes("ВСТАВЬ_СЮДА")) return;
       try {
-        const response = await fetch(COUNTRIES_CSV_URL);
-        const csvText = await response.text();
-        const rows = csvText.trim().split(/\r?\n/).slice(1); // пропускаем заголовок
+        const sheetName = encodeURIComponent("Для_Карты_Стран");
+        const url = `https://google.com{CONFIG.spreadsheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}`;
+        const response = await fetch(url);
+        const text = await response.text();
+        const json = JSON.parse(text.substring(47).slice(0, -2));
         
         let total = 0;
-        rows.forEach(row => {
-          // Ищем последнее число в строке (количество ответов по стране)
-          const match = row.match(/(\d+)\s*"?\s*$/);
-          if (match) {
-            total += parseInt(match[1], 10);
+        json.table.rows.forEach(row => {
+          if (row.c && row.c[1] && typeof row.c[1].v === "number") {
+            total += row.c[1].v;
           }
         });
 
@@ -415,64 +446,24 @@
           document.getElementById("counterBadge").style.display = "inline-flex";
         }
       } catch (err) {
-        console.warn("Не удалось загрузить счётчик ответов:", err);
+        console.warn("Ошибка загрузки счётчика:", err);
       }
     }
 
     loadResponseCounter();
 
-
-    // Автоматически добавляем ?dark=true к ссылкам на карты
-    function formatDarkUrl(url) {
-      if (!url || url.includes("ССЫЛКА")) return "";
-      const separator = url.includes("?") ? "&" : "?";
-      return url + separator + "dark=true";
-    }
-
-    const mapFrame = document.getElementById("mapFrame");
-    const mapWrapper = document.getElementById("mapWrapper");
-    document.getElementById("formLink").href = CONFIG.googleFormUrl;
-
-    // Загружаем карту городов по умолчанию
-    mapFrame.src = formatDarkUrl(CONFIG.citiesMapUrl);
-
-    // Переключение вкладок
-    function switchMap(type, btn) {
-      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-
-      const targetUrl = type === "cities" ? CONFIG.citiesMapUrl : CONFIG.countriesMapUrl;
-      mapFrame.src = formatDarkUrl(targetUrl);
-    }
-
-    // Полноэкранный режим (нативный + fallback для iOS)
-    function toggleFullscreen() {
-      const isFull = mapWrapper.classList.toggle("is-fullscreen");
-      document.body.style.overflow = isFull ? "hidden" : "";
-    }
-    // Закрытие полноэкранного режима по клавише Esc
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && mapWrapper.classList.contains("is-fullscreen")) {
-        toggleFullscreen();
-      }
-    });
-
-  </script>
-  
-  <script type="text/javascript">
+    // Автовысота графиков Datawrapper
     window.addEventListener("message", function(a) {
       if (void 0 !== a.data["datawrapper-height"]) {
         var e = document.querySelectorAll("iframe");
         for (var t in a.data["datawrapper-height"])
           for (var r = 0; r < e.length; r++)
             if (e[r].contentWindow === a.source) {
-              var i = a.data["datawrapper-height"][t] + "px";
-              e[r].style.height = i;
+              e[r].style.height = a.data["datawrapper-height"][t] + "px";
             }
       }
     });
   </script>
 
 </body>
-
 </html>
