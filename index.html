@@ -602,6 +602,8 @@
       <span class="quick-nav-label">Перейти:</span>
       <a href="#mapSection">Карта</a>
       <span class="quick-nav-sep" aria-hidden="true">•</span>
+      <a href="#countriesStats">География по странам</a>
+      <span class="quick-nav-sep" aria-hidden="true">•</span>
       <a href="#baseAudience">Возраст и стаж в фандоме</a>
       <span class="quick-nav-sep" aria-hidden="true">•</span>
       <a href="#theatreActivity">Театральная активность и поездки</a>
@@ -612,9 +614,8 @@
     </nav>
 
     <div class="controls-bar" id="mapSection">
-      <div class="tabs">
-        <button class="tab-btn active" onclick="switchMap('cities', this)">По городам</button>
-        <button class="tab-btn" onclick="switchMap('countries', this)">По странам</button>
+      <div style="font-size: 15px; font-weight: 700; color: #ffffff;">
+        Карта городов
       </div>
 
       <button class="fullscreen-btn" onclick="toggleFullscreen()">
@@ -638,6 +639,18 @@
       <p class="subtitle">По результатам опроса (данные обновляются автоматически).</p>
 
       <div class="kpi-strip" id="audienceKpis"></div>
+
+      <h3 id="countriesStats" class="sub-section-title">География по странам</h3>
+      <p class="sub-section-lead">
+        В каких странах живет РМТ фандом?
+      </p>
+      <div class="charts-stack">
+        <div class="chart-card">
+          <div style="min-height:420px" id="datawrapper-vis-ushqs">
+            <script type="text/javascript" defer src="https://dwcdn.net" charset="utf-8" data-target="#datawrapper-vis-ushqs" data-dark="true"></script>
+          </div>
+        </div>
+      </div>
       
       <h3 id="baseAudience" class="sub-section-title">Возраст и стаж в фандоме</h3>
       <p class="sub-section-lead">
