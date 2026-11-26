@@ -190,7 +190,7 @@
     }
 
     .map-wrapper {
-      background: #1c1c1e; /* в тон тёмному фону карты Datawrapper */
+      background: #1c1c1e;
       border: 1px solid var(--border-subtle);
       border-radius: 14px;
       overflow: hidden;
@@ -218,31 +218,48 @@
         padding: 10px;
       }
     
-      .map-frame {
+      .map-wrapper:not(.is-fullscreen) .map-frame {
         min-width: 680px;
         height: 460px;
       }
     }
     
+    /* Полноэкранный режим поверх всей страницы */
+    .map-wrapper.is-fullscreen {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100dvh;
+      z-index: 9999;
+      border-radius: 0;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      background: #1c1c1e;
+    }
+    
     .map-wrapper.is-fullscreen .map-scroll-area {
       flex: 1;
+      width: 100%;
       height: 100%;
       padding: 0;
+      overflow: auto;
     }
     
     .map-wrapper.is-fullscreen .map-frame {
+      width: 100%;
       height: 100%;
       min-width: 100%;
       border-radius: 0;
     }
-
+    
     .close-fullscreen-btn {
       display: none;
       position: fixed;
       top: 14px;
       right: 14px;
       z-index: 10000;
-      background: rgba(24, 24, 27, 0.9);
+      background: rgba(24, 24, 27, 0.92);
       color: var(--accent-gold);
       border: 1px solid var(--accent-gold);
       padding: 8px 14px;
@@ -252,7 +269,7 @@
       cursor: pointer;
       backdrop-filter: blur(4px);
     }
-
+    
     .map-wrapper.is-fullscreen .close-fullscreen-btn {
       display: inline-flex;
       align-items: center;
@@ -400,10 +417,34 @@
       mapFrame.src = formatDarkUrl(targetUrl);
     }
 
-    function toggleFullscreen() {
+    async function toggleFullscreen() {
       const isFull = mapWrapper.classList.toggle("is-fullscreen");
       document.body.style.overflow = isFull ? "hidden" : "";
+    
+      if (isFull) {
+        if (mapWrapper.requestFullscreen && !document.fullscreenElement) {
+          try {
+            await mapWrapper.requestFullscreen();
+          } catch (e) {
+            // Если браузер запретил системный fullscreen (например, iOS Safari),
+            // сработает CSS-режим поверх всего окна (position: fixed)
+          }
+        }
+      } else {
+        if (document.fullscreenElement && document.exitFullscreen) {
+          try {
+            await document.exitFullscreen();
+          } catch (e) {}
+        }
+      }
     }
+    
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement && mapWrapper.classList.contains("is-fullscreen")) {
+        mapWrapper.classList.remove("is-fullscreen");
+        document.body.style.overflow = "";
+      }
+    });
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && mapWrapper.classList.contains("is-fullscreen")) {
