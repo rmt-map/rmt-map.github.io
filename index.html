@@ -898,25 +898,34 @@
     
         json.table.rows.forEach((row) => {
           if (!row.c) return;
-          const key = String(row.c[0]?.v || "").trim().toLowerCase();
-          const label = row.c[1]?.v;
+    
+          // ВОТ ЗДЕСЬ — сразу при чтении каждой строки таблицы:
           const value = row.c[2]?.v;
           const sub = row.c[3]?.v;
+          const rawKey = String(row.c[0]?.v ?? "").trim().toLowerCase();
+          const rawLabel = String(row.c[1]?.v ?? "").trim().toLowerCase();
+          const numValue = Number(value);
     
           // Отправляем города в шапку
-          if (key === "cities_count" && typeof value === "number") {
-            if (citiesEl) citiesEl.textContent = pluralize(value, "город", "города", "городов");
+          if (rawKey === "cities_count" || rawLabel.includes("город")) {
+            if (citiesEl && !Number.isNaN(numValue) && value !== null && value !== "") {
+              citiesEl.textContent = pluralize(numValue, "город", "города", "городов");
+            }
             return;
           }
     
           // Отправляем страны в шапку
-          if (key === "countries_count" && typeof value === "number") {
-            if (countriesEl) countriesEl.textContent = pluralize(value, "страна", "страны", "стран");
+          if (rawKey === "countries_count" || rawLabel.includes("стран")) {
+            if (countriesEl && !Number.isNaN(numValue) && value !== null && value !== "") {
+              countriesEl.textContent = pluralize(numValue, "страна", "страны", "стран");
+            }
             return;
           }
     
+          const label = row.c[1]?.v;
+    
           // Пропускаем строку заголовков, если API всё же вернул её
-          if (!label || value === null || value === undefined || key === "ключ" || label === "Заголовок плашки") {
+          if (!label || value === null || value === undefined || rawKey === "ключ" || label === "Заголовок плашки") {
             return;
           }
     
