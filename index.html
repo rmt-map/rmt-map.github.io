@@ -165,9 +165,10 @@
         padding: 9px 14px;
       }
     }
-        
-    .counter-badge {
+    
+    .live-badge {
       display: inline-flex;
+      flex-wrap: wrap;
       align-items: center;
       gap: 8px;
       background: rgba(123, 44, 191, 0.22);
@@ -179,20 +180,34 @@
       border-radius: 20px;
       margin-top: 14px;
     }
-
-    .counter-dot {
+    
+    .live-badge .pulse-dot {
       width: 8px;
       height: 8px;
+      flex-shrink: 0;
       background-color: var(--accent-gold);
       border-radius: 50%;
       box-shadow: 0 0 8px var(--accent-gold);
     }
-
-    .counter-badge strong {
+    
+    .live-badge strong {
       color: var(--accent-gold);
       font-weight: 700;
     }
-
+    
+    .live-badge .badge-sep {
+      color: rgba(244, 244, 246, 0.45);
+      user-select: none;
+    }
+    
+    @media (max-width: 600px) {
+      .live-badge {
+        gap: 6px 8px;
+        padding: 8px 12px;
+        font-size: 12.5px;
+      }
+    }
+    
     .cta-button {
       display: inline-flex;
       align-items: center;
@@ -602,9 +617,13 @@
       <div class="header-text">
         <h1>Карта фандома РМТ</h1>
         <p>Привет! Перед вами результат моего исследования о том, где живут и что любят фанаты российского музыкального театра по всему миру. Данные на картах и графиках обновляются автоматически по мере заполнения анкеты.</p>
-        <div class="counter-badge" id="counterBadge">
-          <span class="counter-dot"></span>
+        <div class="live-badge">
+          <span class="pulse-dot"></span>
           <span>Уже на карте: <strong id="totalResponses">...</strong></span>
+          <span class="badge-sep" aria-hidden="true">•</span>
+          <span><strong id="totalCities">...</strong></span>
+          <span class="badge-sep" aria-hidden="true">•</span>
+          <span><strong id="totalCountries">...</strong></span>
         </div>
       </div>
       <div class="header-actions">
@@ -635,7 +654,7 @@
     <div class="controls-bar" id="mapSection">
       <div>
         <h2 style="font-size: 24px; font-weight: 700; color: #ffffff; margin: 0;">
-          Карта городов
+          Карта наших городов
         </h2>
       </div>
 
@@ -827,14 +846,17 @@
       }
     });
 
-    function pluralizeParticipants(n) {
+    // Универсальное склонение слов (1 участник / 2 участника / 5 участников)
+    function pluralize(n, one, few, many) {
       const mod10 = n % 10;
       const mod100 = n % 100;
-      if (mod10 === 1 && mod100 !== 11) return `${n} участник`;
-      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return `${n} участника`;
-      return `${n} участников`;
+      if (mod100 >= 11 && mod100 <= 14) return `${n} ${many}`;
+      if (mod10 === 1) return `${n} ${one}`;
+      if (mod10 >= 2 && mod10 <= 4) return `${n} ${few}`;
+      return `${n} ${many}`;
     }
 
+    // 1. Загрузка количества участников с листа Для_Карты_Стран
     async function loadResponseCounter() {
       try {
         const sheetName = encodeURIComponent("Для_Карты_Стран");
@@ -849,59 +871,75 @@
             total += row.c.at(2).v;
           }
         });
-
+    
         if (total > 0) {
-          document.getElementById("totalResponses").textContent = pluralizeParticipants(total);
+          const el = document.getElementById("totalResponses");
+          if (el) el.textContent = pluralize(total, "участник", "участника", "участников");
         }
       } catch (err) {
-        console.warn("Ошибка загрузки счётчика:", err);
+        console.warn("Ошибка загрузки счётчика участников:", err);
       }
     }
-
-    loadResponseCounter();
     
+    // 2. Загрузка городов, стран (в шапку) и карточек KPI (в портрет аудитории) из KPI_Summary
     async function loadKpiSummary() {
-    const container = document.getElementById("audienceKpis");
-    if (!container) return;
-  
-    try {
-      const sheetName = encodeURIComponent("KPI_Summary");
-      const url = `https://docs.google.com/spreadsheets/d/${CONFIG.spreadsheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}&headers=1`;
-      const response = await fetch(url);
-      const text = await response.text();
-      const json = JSON.parse(text.substring(47).slice(0, -2));
-  
-      const cardsHtml = json.table.rows
-        .map((row) => {
-          if (!row.c) return "";
+      const container = document.getElementById("audienceKpis");
+      const citiesEl = document.getElementById("totalCities");
+      const countriesEl = document.getElementById("totalCountries");
+    
+      try {
+        const sheetName = encodeURIComponent("KPI_Summary");
+        const url = `https://docs.google.com/spreadsheets/d/${CONFIG.spreadsheetId}/gviz/tq?tqx=out:json&sheet=${sheetName}&headers=1`;
+        const response = await fetch(url);
+        const text = await response.text();
+        const json = JSON.parse(text.substring(47).slice(0, -2));
+    
+        const cardsHtml = [];
+    
+        json.table.rows.forEach((row) => {
+          if (!row.c) return;
           const key = String(row.c[0]?.v || "").trim().toLowerCase();
           const label = row.c[1]?.v;
           const value = row.c[2]?.v;
           const sub = row.c[3]?.v;
-  
-          // Пропускаем строку заголовков, даже если gviz отдаст её как данные
-          if (!label || value === null || value === undefined || key === "ключ" || label === "Заголовок плашки") {
-            return "";
+    
+          // Отправляем города в шапку
+          if (key === "cities_count" && typeof value === "number") {
+            if (citiesEl) citiesEl.textContent = pluralize(value, "город", "города", "городов");
+            return;
           }
-  
-          return `
+    
+          // Отправляем страны в шапку
+          if (key === "countries_count" && typeof value === "number") {
+            if (countriesEl) countriesEl.textContent = pluralize(value, "страна", "страны", "стран");
+            return;
+          }
+    
+          // Пропускаем строку заголовков, если API всё же вернул её
+          if (!label || value === null || value === undefined || key === "ключ" || label === "Заголовок плашки") {
+            return;
+          }
+    
+          // Остальные строки собираем в карточки портрета аудитории
+          cardsHtml.push(`
             <div class="kpi-card">
               <div class="kpi-label">${label}</div>
               <div class="kpi-value">${value}</div>
               ${sub ? `<div class="kpi-sub">${sub}</div>` : ""}
             </div>
-          `;
-        })
-        .join("");
-  
-      if (cardsHtml) {
-        container.innerHTML = cardsHtml;
-      }
-    } catch (err) {
-      console.warn("Ошибка загрузки KPI_Summary:", err);
-    }
-  }
+          `);
+        });
     
+        if (container && cardsHtml.length > 0) {
+          container.innerHTML = cardsHtml.join("");
+        }
+      } catch (err) {
+        console.warn("Ошибка загрузки KPI_Summary:", err);
+      }
+    }
+    
+    // Запускаем обе функции
+    loadResponseCounter();
     loadKpiSummary();
     
     const backToTopBtn = document.getElementById("backToTopBtn");
