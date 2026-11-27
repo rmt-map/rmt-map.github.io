@@ -470,6 +470,25 @@
       margin: -6px 0 18px;
       line-height: 1.55;
     }
+
+    .duo-charts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    
+    .duo-charts-grid .chart-card {
+      min-width: 0;
+      margin-bottom: 0;
+    }
+    
+    @media (max-width: 768px) {
+      .duo-charts-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+    }
     
     .bottom-cta-card {
       margin-top: 40px;
@@ -609,6 +628,8 @@
       <a href="#theatreActivity">Театральная активность и поездки</a>
       <span class="quick-nav-sep" aria-hidden="true">•</span>
       <a href="#topMusicals">Топ-10 любимых спектаклей</a>
+      <span class="quick-nav-sep" aria-hidden="true">•</span>
+      <a href="#topArtists">Топ-10 любимых артистов и артисток</a>
     </nav>
 
     <div class="controls-bar" id="mapSection">
@@ -698,6 +719,23 @@
         <div class="chart-card">
           <div style="min-height:465px" id="datawrapper-vis-ujpeL">
             <script type="text/javascript" defer src="https://datawrapper.dwcdn.net/ujpeL/embed.js" charset="utf-8" data-target="#datawrapper-vis-ujpeL" data-dark="true"></script>
+          </div>
+        </div>
+      </div>
+
+      <h3 id="topArtists" class="sub-section-title">Топ-10 любимых артистов и артисток</h3>
+      <p class="sub-section-lead"> Какие из исполнителей российского музыкального театра полюбились зрителям по всему миру? Топ-10 артистов и артисток, которых участники опроса отмечали среди самых любимых чаще всего.</p>
+      
+      <div class="duo-charts-grid">
+        <div class="chart-card">
+          <div style="min-height:465px" id="datawrapper-vis-bHuTl">
+            <script type="text/javascript" defer src="https://datawrapper.dwcdn.net/bHuTl/embed.js" charset="utf-8" data-target="#datawrapper-vis-bHuTl" data-dark="true"></script>
+          </div>
+        </div>
+      
+        <div class="chart-card">
+          <div style="min-height:465px" id="datawrapper-vis-yzfpL">
+            <script type="text/javascript" defer src="https://datawrapper.dwcdn.net/yzfpL/embed.js" charset="utf-8" data-target="#datawrapper-vis-yzfpL" data-dark="true"></script>
           </div>
         </div>
       </div>
